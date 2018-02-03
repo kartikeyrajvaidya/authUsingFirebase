@@ -21,12 +21,17 @@ export class AuthService {
     singIn(email: string, password: string) {
         firebase.auth().signInWithEmailAndPassword(email, password)
         .then(
-            () => {
+            (response) => {
+                console.log(response);
                 this.route.navigate(['/']);
-                firebase.auth().currentUser.getIdToken()
+                firebase.auth().currentUser.getIdToken(true)
                 .then(
-                    (token: string) => this.token = token
-                );
+                    (idToken: string) => {
+                        this.token = idToken;
+                        console.log(idToken);
+                    }).catch(function(error) {
+                        console.log(error);
+                      });
             }
         )
         .catch(
