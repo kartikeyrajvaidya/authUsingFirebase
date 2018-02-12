@@ -1,7 +1,7 @@
-import { TokenModel } from './maincomponent.model';
-import { AuthService } from './../auth/auth.service';
-import { Component, OnInit } from '@angular/core';
+import { GooglemapsService } from './../shared/googlemaps.service';
 import { Http } from '@angular/http';
+import { Component, OnInit } from '@angular/core';
+
 
 @Component({
   selector: 'app-maincomponent',
@@ -10,21 +10,51 @@ import { Http } from '@angular/http';
 })
 export class MaincomponentComponent implements OnInit {
 
-  private baseUrl = 'http://localhost:8080';
-  constructor(private http: Http, private authService: AuthService) { }
-  tokenModel: TokenModel ;
-  ngOnInit() {
-  }
-  onCheckOut() {
-    this.tokenModel = {
-      tokenId : this.authService.getToken()
-    };
-    this.http.post( this.baseUrl + '/api/verify' , this.tokenModel)
-    .subscribe(
-      (response) => {
-        console.log(response.json());
-      }
-    );
-  }
+  constructor(private http: Http, private googlemapsService: GooglemapsService) { }
 
+ geolocationPosition: Position;
+  ngOnInit() {
+    let count = 0;
+    let zipcode = 0;
+    if (window.navigator && window.navigator.geolocation) {
+      window.navigator.geolocation.getCurrentPosition(
+          (position) => {
+              this.geolocationPosition = position;
+                  const pos = position['coords'];
+                  const lat = pos['latitude'];
+                  const long = pos['longitude'];
+                  this.googlemapsService.getCurrentPinCode(lat, long).subscribe(
+                  (response) => {
+                   const res = response.json();
+                   const results = res['results'];
+                   for (let i = 0; i < results.length; i++) {
+                    for (let j = 0 ; j < results[i].address_components.length; j++) {
+                        for (let k = 0; k < results[i].address_components[j].types.length; k++) {
+                            if (results[i].address_components[j].types[k] === 'postal_code' && count === 0) {
+                                 zipcode = results[i].address_components[j].short_name;
+                                count ++;
+                            }
+                        }
+                    }
+                  }
+                  console.log(zipcode);
+                }
+              );
+          },
+          (error) => {
+              switch (error.code) {
+                  case 1:
+                      console.log('Permission Denied');
+                      break;
+                  case 2:
+                      console.log('Position Unavailable');
+                      break;
+                  case 3:
+                      console.log('Timeout');
+                      break;
+              }
+          }
+      );
+    }
+  }
 }

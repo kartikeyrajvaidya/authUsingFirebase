@@ -1,3 +1,4 @@
+import { FreelistingComponent } from './freelisting/freelisting.component';
 import { MaincomponentComponent } from './maincomponent/maincomponent.component';
 import { AppComponent } from './app.component';
 import { SinginComponent } from './auth/singin/singin.component';
@@ -7,6 +8,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 const appRoutes: Routes = [
     {path: '', component: MaincomponentComponent},
+    {path: 'register', component: FreelistingComponent},
     {path: 'singup', component: SingupComponent},
     {path: 'singin', component: SinginComponent}
   ];
