@@ -1,9 +1,12 @@
 import { Router } from '@angular/router';
-import { NgForm } from '@angular/forms';
+import { NgForm, FormControl } from '@angular/forms';
 import { TokenModel } from '../shared/token.model';
 import { AuthService } from './../auth/auth.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { Http } from '@angular/http';
+import { } from 'googlemaps';
+import {MapsAPILoader} from '@agm/core' ;
+
 
 @Component({
   selector: 'app-freelisting',
@@ -12,17 +15,46 @@ import { Http } from '@angular/http';
 })
 export class FreelistingComponent implements OnInit {
 
+   public latitude: number;
+   public longitude: number;
+   public searchControl: FormControl;
+   public zoom: number;
+
+
+   @ViewChild('search') public searchElement: ElementRef;
+
+
     private baseUrl = 'http://localhost:8080';
-    constructor(private http: Http, private authService: AuthService, private route: Router) { }
+    constructor(private http: Http, private authService: AuthService, private route: Router, private mapsAPILoader: MapsAPILoader,
+      private ngZone: NgZone) { }
     tokenModel: TokenModel ;
 
     ngOnInit() {
+      this.mapsAPILoader.load().then(
+        () => {
+                const autocomplete = new google.maps.places.Autocomplete(this.searchElement.nativeElement,
+                { types: [] });
+                autocomplete.addListener('place_changed', () => {
+                  this.ngZone.run(() => {
+                    const place: google.maps.places.PlaceResult = autocomplete.getPlace();
+                    if (place.geometry === undefined || place.geometry === null ) {
+                      return;
+                    }
+                  });
+                });
+              }
+      ).catch(
+       () => {
+         console.log('dsxfgvbhjnk');
+        }
+      );
     }
 
     onSubmit(form: NgForm) {
       this.tokenModel = {
         tokenId : this.authService.getToken()
       };
+      const geocoder = new google.maps.Geocoder();
       const name = form.value.name;
       const building = form.value.building;
       const street = form.value.street;
@@ -32,6 +64,14 @@ export class FreelistingComponent implements OnInit {
       const pincode = form.value.pincode;
       const state = form.value.state;
       const country = form.value.country;
+
+      // geocoder.geocode( country , function(results, status) {
+      //   if (status === 'OK') {
+      //     console.log(results + 'Hello');
+      //   }else {
+      //     console.log('Hello');
+      //   }
+      // });
       this.http.post( this.baseUrl + '/api/verify' , this.tokenModel)
       .subscribe(
         (response) => {
