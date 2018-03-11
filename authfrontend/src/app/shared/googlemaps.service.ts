@@ -8,6 +8,6 @@ export class GooglemapsService {
   geolocationPosition: Position;
   getCurrentPinCode(lat, long) {
     // tslint:disable-next-line:max-line-length
-    return this.http.get('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat + ',' + long + '&key=AIzaSyCoJzj6DXv33mHqDRcw1YBzTMr2E36HI3U')
+    return this.http.get('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat + ',' + long + '&key=AIzaSyCoJzj6DXv33mHqDRcw1YBzTMr2E36HI3U');
   }
 }

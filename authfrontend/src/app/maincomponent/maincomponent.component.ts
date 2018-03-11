@@ -1,3 +1,4 @@
+import { ShopdataService } from './../shared/shopdata.service';
 import { GooglemapsService } from './../shared/googlemaps.service';
 import { Http } from '@angular/http';
 import { Component, OnInit } from '@angular/core';
@@ -10,12 +11,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class MaincomponentComponent implements OnInit {
 
-  constructor(private http: Http, private googlemapsService: GooglemapsService) { }
+  constructor(private http: Http, private googlemapsService: GooglemapsService, private shopdataService: ShopdataService) { }
 
  geolocationPosition: Position;
   ngOnInit() {
-    let count = 0;
-    let zipcode = 0;
     if (window.navigator && window.navigator.geolocation) {
       window.navigator.geolocation.getCurrentPosition(
           (position) => {
@@ -23,23 +22,8 @@ export class MaincomponentComponent implements OnInit {
                   const pos = position['coords'];
                   const lat = pos['latitude'];
                   const long = pos['longitude'];
-                  this.googlemapsService.getCurrentPinCode(lat, long).subscribe(
-                  (response) => {
-                   const res = response.json();
-                   const results = res['results'];
-                   for (let i = 0; i < results.length; i++) {
-                    for (let j = 0 ; j < results[i].address_components.length; j++) {
-                        for (let k = 0; k < results[i].address_components[j].types.length; k++) {
-                            if (results[i].address_components[j].types[k] === 'postal_code' && count === 0) {
-                                 zipcode = results[i].address_components[j].short_name;
-                                count ++;
-                            }
-                        }
-                    }
-                  }
-                  console.log(zipcode);
-                }
-              );
+                  console.log(lat + '++++' + long);
+                  this.shopdataService.getShops(lat, long);
           },
           (error) => {
               switch (error.code) {
